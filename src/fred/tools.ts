@@ -5,9 +5,16 @@
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import { searchSeries, FREDSearchOptions } from "./search.js";
+import { searchSeries, FREDSearchOptions, getHighFrequencyIndicators } from "./search.js";
 import { getSeriesData, FREDSeriesOptions } from "./series.js";
 import { browseCategories, getCategorySeries, browseReleases, getReleaseSeries, browseSources } from "./browse.js";
+
+/**
+ * Schema for FRED high frequency indicators tool
+ */
+const HIGH_FREQUENCY_SCHEMA = {
+  limit: z.number().min(1).max(1000).optional().default(100).describe("Maximum number of high frequency indicators to return (default: 100)")
+};
 
 /**
  * Schema for FRED search tool
@@ -68,6 +75,19 @@ const BROWSE_SCHEMA = {
  * Registers the simplified FRED tools with the MCP server
  */
 export function registerFREDTools(server: McpServer) {
+  // Register high frequency indicators tool
+  server.tool(
+    "fred_get_high_frequency_indicators",
+    "Get the top high frequency (Daily or Weekly) economic indicators from FRED, ordered by popularity. This provides quick access to the most important frequently-updated economic data series.",
+    HIGH_FREQUENCY_SCHEMA,
+    async (input: any) => {
+      console.error(`fred_get_high_frequency_indicators called with params: ${JSON.stringify(input)}`);
+      const result = await getHighFrequencyIndicators(input.limit);
+      console.error("fred_get_high_frequency_indicators complete");
+      return result;
+    }
+  );
+
   // Register browse tool for comprehensive navigation
   server.tool(
     "fred_browse",

@@ -25,18 +25,19 @@ describe('FRED tools module', () => {
       expect(typeof registerFREDTools).toBe('function');
     });
     
-    test('registers all three tools with the server', () => {
+    test('registers all four tools with the server', () => {
       const mockServer = createMockServer();
       registerFREDTools(mockServer as any);
       
-      // Verify server.tool was called three times
-      expect(mockServer.tool).toHaveBeenCalledTimes(3);
+      // Verify server.tool was called four times
+      expect(mockServer.tool).toHaveBeenCalledTimes(4);
       
       // Get the registered tools
       const toolCalls = mockServer.tool.mock.calls;
       const toolNames = toolCalls.map(call => call[0]);
       
-      // Verify all three tools are registered
+      // Verify all four tools are registered
+      expect(toolNames).toContain('fred_get_high_frequency_indicators');
       expect(toolNames).toContain('fred_browse');
       expect(toolNames).toContain('fred_search');
       expect(toolNames).toContain('fred_get_series');

@@ -93,7 +93,16 @@ Replace `<your-key-here>` with your actual FRED API key.
 
 ## Available Tools
 
-This MCP server provides three comprehensive tools to access all 800,000+ FRED® economic data series:
+This MCP server provides four comprehensive tools to access all 800,000+ FRED® economic data series:
+
+### `fred_get_high_frequency_indicators`
+
+**Description**: Get the top high frequency (Daily or Weekly) economic indicators from FRED, ordered by popularity. This provides quick access to the most important frequently-updated economic data series.
+
+**Parameters**:
+* `limit` (optional): Maximum number of high frequency indicators to return (default: 100)
+
+**Example Usage**: Perfect for getting a quick overview of the most important daily and weekly economic indicators that are updated frequently.
 
 ### `fred_browse`
 
@@ -149,7 +158,8 @@ This MCP server provides three comprehensive tools to access all 800,000+ FRED®
 
 ## Example Usage
 
-With these three tools, you can:
+With these four tools, you can:
+- **Quickly access high frequency indicators**: Get the top 100 most popular daily/weekly indicators
 - Browse all economic categories and discover available data
 - Search for specific indicators by keywords or tags
 - Retrieve any of the 800,000+ series with custom transformations
