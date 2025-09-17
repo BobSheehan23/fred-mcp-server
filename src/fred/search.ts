@@ -116,6 +116,85 @@ export async function searchSeries(options: FREDSearchOptions = {}) {
 }
 
 /**
+ * Gets the top 100 high frequency (Daily or Weekly) indicators
+ */
+export async function getHighFrequencyIndicators(limit: number = 100) {
+  try {
+    // Search for daily indicators
+    const dailyQueryParams: Record<string, string | number> = {
+      filter_variable: "frequency",
+      filter_value: "Daily",
+      order_by: "popularity",
+      sort_order: "desc",
+      limit: Math.ceil(limit / 2), // Split between daily and weekly
+      offset: 0
+    };
+    
+    const dailyResponse = await makeRequest<SearchResponse>(
+      "series/search",
+      dailyQueryParams
+    );
+    
+    // Search for weekly indicators
+    const weeklyQueryParams: Record<string, string | number> = {
+      filter_variable: "frequency",
+      filter_value: "Weekly",
+      order_by: "popularity",
+      sort_order: "desc",
+      limit: Math.ceil(limit / 2), // Split between daily and weekly
+      offset: 0
+    };
+    
+    const weeklyResponse = await makeRequest<SearchResponse>(
+      "series/search",
+      weeklyQueryParams
+    );
+    
+    // Combine and sort by popularity
+    const allSeries = [
+      ...dailyResponse.seriess.map(s => ({ ...s, frequency_category: 'Daily' })),
+      ...weeklyResponse.seriess.map(s => ({ ...s, frequency_category: 'Weekly' }))
+    ];
+    
+    // Sort by popularity and take top indicators
+    const topIndicators = allSeries
+      .sort((a, b) => b.popularity - a.popularity)
+      .slice(0, limit);
+    
+    const formattedResults = {
+      description: `Top ${topIndicators.length} high frequency (Daily/Weekly) economic indicators`,
+      total_daily: dailyResponse.count,
+      total_weekly: weeklyResponse.count,
+      showing_top: topIndicators.length,
+      indicators: topIndicators.map(series => ({
+        id: series.id,
+        title: series.title,
+        frequency: series.frequency,
+        frequency_category: series.frequency_category,
+        units: series.units,
+        seasonal_adjustment: series.seasonal_adjustment,
+        observation_range: `${series.observation_start} to ${series.observation_end}`,
+        last_updated: series.last_updated,
+        popularity: series.popularity,
+        notes: series.notes?.substring(0, 150) + (series.notes && series.notes.length > 150 ? "..." : "")
+      }))
+    };
+    
+    return {
+      content: [{
+        type: "text" as const,
+        text: JSON.stringify(formattedResults, null, 2)
+      }]
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to get high frequency indicators: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+/**
  * Gets detailed information about a specific series
  */
 export async function getSeriesInfo(seriesId: string) {
